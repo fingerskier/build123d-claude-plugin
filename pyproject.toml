@@ -1,0 +1,26 @@
+[build-system]
+requires = ["hatchling"]
+build-backend = "hatchling.build"
+
+[project]
+name = "build123d-mcp"
+version = "0.1.0"
+description = "MCP server for CAD modeling with build123d in Claude Code"
+readme = "README.md"
+license = "MIT"
+requires-python = ">=3.10"
+dependencies = [
+    "mcp>=1.0.0",
+    "build123d>=0.7.0",
+    "CairoSVG>=2.7.0",
+    "Pillow>=10.0",
+]
+
+[project.scripts]
+build123d-mcp = "build123d_mcp.server:main"
+
+[tool.hatch.build.targets.wheel]
+packages = ["src/build123d_mcp"]
+
+[tool.pytest.ini_options]
+testpaths = ["tests"]
