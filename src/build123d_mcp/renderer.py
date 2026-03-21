@@ -44,18 +44,29 @@ def render_svg(
     """
     from build123d import export_svg, Axis, Vector
 
-    view_dir = VIEW_ANGLES.get(view, VIEW_ANGLES["iso"])
-    view_dir = _normalize(view_dir)
+    if view not in VIEW_ANGLES:
+        raise ValueError(
+            f"Unknown view '{view}'. Available views: {', '.join(VIEW_ANGLES)}"
+        )
+    view_dir = _normalize(VIEW_ANGLES[view])
 
     # build123d's export_svg expects a viewport_origin (the eye direction)
     try:
         svg_content = export_svg(
             shape,
             viewport_origin=Vector(view_dir[0] * 100, view_dir[1] * 100, view_dir[2] * 100),
+            canvas_width=width,
+            canvas_height=height,
         )
     except TypeError:
-        # Fallback if export_svg API differs
-        svg_content = export_svg(shape)
+        # Fallback if export_svg API doesn't support canvas_width/height
+        try:
+            svg_content = export_svg(
+                shape,
+                viewport_origin=Vector(view_dir[0] * 100, view_dir[1] * 100, view_dir[2] * 100),
+            )
+        except TypeError:
+            svg_content = export_svg(shape)
 
     return svg_content
 

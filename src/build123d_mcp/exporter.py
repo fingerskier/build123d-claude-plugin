@@ -1,6 +1,5 @@
 """Export build123d shapes to STL, STEP, and extract model properties."""
 
-import json
 from pathlib import Path
 from typing import Any
 

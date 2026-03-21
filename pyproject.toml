@@ -4,7 +4,7 @@ build-backend = "hatchling.build"
 
 [project]
 name = "build123d-mcp"
-version = "0.1.0"
+version = "2026.3.10"
 description = "MCP server for CAD modeling with build123d in Claude Code"
 readme = "README.md"
 license = "MIT"

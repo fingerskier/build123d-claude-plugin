@@ -27,6 +27,20 @@ def _ensure_output_dir() -> Path:
     return _output_dir
 
 
+def _safe_path(file_path: str) -> Path:
+    """Resolve a user-provided file path safely within the output directory.
+
+    Raises ValueError if the resolved path escapes the output directory.
+    """
+    out_dir = _ensure_output_dir()
+    full = (out_dir / file_path).resolve()
+    if not full.is_relative_to(out_dir.resolve()):
+        raise ValueError(
+            f"Path '{file_path}' resolves outside the output directory."
+        )
+    return full
+
+
 # ---------------------------------------------------------------------------
 # Server setup
 # ---------------------------------------------------------------------------
@@ -225,10 +239,8 @@ async def _handle_export_stl(args: dict[str, Any]) -> list[TextContent]:
     file_path = args.get("file_path", f"{model_name}.stl")
     tolerance = args.get("tolerance", 0.001)
 
-    out_dir = _ensure_output_dir()
-    full_path = out_dir / file_path
-
     try:
+        full_path = _safe_path(file_path)
         result_path = await asyncio.to_thread(export_stl, shape, full_path, tolerance=tolerance)
         size_kb = result_path.stat().st_size / 1024
         return [TextContent(type="text", text=f"Exported STL to {result_path} ({size_kb:.1f} KB)")]
@@ -244,10 +256,8 @@ async def _handle_export_step(args: dict[str, Any]) -> list[TextContent]:
     shape = _models[model_name]
     file_path = args.get("file_path", f"{model_name}.step")
 
-    out_dir = _ensure_output_dir()
-    full_path = out_dir / file_path
-
     try:
+        full_path = _safe_path(file_path)
         result_path = await asyncio.to_thread(export_step, shape, full_path)
         size_kb = result_path.stat().st_size / 1024
         return [TextContent(type="text", text=f"Exported STEP to {result_path} ({size_kb:.1f} KB)")]
@@ -274,8 +284,7 @@ async def _handle_render_image(args: dict[str, Any]) -> list[TextContent | Image
         ]
 
         if save_path:
-            out_dir = _ensure_output_dir()
-            full_path = out_dir / save_path
+            full_path = _safe_path(save_path)
             if save_path.endswith(".svg"):
                 await asyncio.to_thread(save_svg, shape, str(full_path), view=view, width=width, height=height)
             else:

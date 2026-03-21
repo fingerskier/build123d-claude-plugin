@@ -128,39 +128,58 @@ def _timeout_handler(signum: int, frame: Any) -> None:
     )
 
 
-class _TimeoutThread:
-    """Thread-safe timeout using a background timer thread.
+def _execute_in_process(code: str, timeout: int) -> ExecutionResult:
+    """Execute code in a subprocess with a hard timeout.
 
-    Works from any thread (unlike signal.alarm which requires the main thread).
+    Used when signal-based timeout is unavailable (non-main thread).
+    Runs the code in a forked process via concurrent.futures so that
+    C-level blocking calls can be reliably interrupted.
     """
+    import concurrent.futures
 
-    def __init__(self, seconds: int):
-        self.seconds = seconds
-        self._timer: Any = None
+    with concurrent.futures.ProcessPoolExecutor(max_workers=1) as pool:
+        future = pool.submit(_run_sandboxed, code)
+        try:
+            return future.result(timeout=timeout)
+        except concurrent.futures.TimeoutError:
+            raise ExecutionError(
+                f"Code execution timed out after {timeout} seconds."
+            )
 
-    def __enter__(self) -> "_TimeoutThread":
-        import threading
 
-        def _raise_timeout() -> None:
-            import ctypes
-            # Try to interrupt the main thread; if that fails, just let it run
-            try:
-                ctypes.pythonapi.PyThreadState_SetAsyncExc(
-                    ctypes.c_ulong(self._target_tid),
-                    ctypes.py_object(ExecutionError),
-                )
-            except Exception:
-                pass
+def _run_sandboxed(code: str) -> ExecutionResult:
+    """Entry point for subprocess execution — validates and runs the code."""
+    import io
+    import sys
 
-        self._target_tid = threading.current_thread().ident
-        self._timer = threading.Timer(self.seconds, _raise_timeout)
-        self._timer.daemon = True
-        self._timer.start()
-        return self
-
-    def __exit__(self, *args: Any) -> None:
-        if self._timer is not None:
-            self._timer.cancel()
+    _validate_ast(code)
+    namespace = _make_namespace()
+    stdout_capture = io.StringIO()
+    old_stdout = sys.stdout
+    try:
+        sys.stdout = stdout_capture
+        exec(code, namespace)  # noqa: S102
+        shape = _find_result(namespace, code)
+        output = stdout_capture.getvalue()
+        if shape is None:
+            return ExecutionResult(
+                shape=None,
+                output=output,
+                namespace={},
+                error="No shape found in code output. "
+                "Assign a build123d shape to 'result' or use a BuildPart context manager.",
+            )
+        return ExecutionResult(shape=shape, output=output, namespace={})
+    except Exception as e:
+        tb = traceback.format_exc()
+        return ExecutionResult(
+            shape=None,
+            output=stdout_capture.getvalue(),
+            namespace={},
+            error=f"{type(e).__name__}: {e}\n\n{tb}",
+        )
+    finally:
+        sys.stdout = old_stdout
 
 
 def _find_result(namespace: dict[str, Any], code: str) -> Any:
@@ -218,9 +237,9 @@ def _find_result(namespace: dict[str, Any], code: str) -> Any:
     except SyntaxError:
         return None
 
-    # Collect assignment target names in order
+    # Collect assignment target names in source order (top-level statements only)
     assigned_names: list[str] = []
-    for node in ast.walk(tree):
+    for node in tree.body:
         if isinstance(node, ast.Assign):
             for target in node.targets:
                 if isinstance(target, ast.Name):
@@ -285,27 +304,26 @@ def execute_code(code: str, timeout: int = EXECUTION_TIMEOUT) -> ExecutionResult
 
     stdout_capture = io.StringIO()
 
+    # Use signal-based timeout on main thread, process-based otherwise
+    import threading
+
+    use_signal = threading.current_thread() is threading.main_thread()
+
+    if use_signal:
+        try:
+            old_handler = signal.signal(signal.SIGALRM, _timeout_handler)
+            signal.alarm(timeout)
+        except (OSError, AttributeError):
+            use_signal = False
+
+    if not use_signal:
+        # Delegate to a subprocess for reliable timeout
+        return _execute_in_process(code, timeout)
+
     old_stdout = sys.stdout
     try:
-        # Use signal-based timeout on main thread, threading-based otherwise
-        import threading
-
-        use_signal = threading.current_thread() is threading.main_thread()
-
-        if use_signal:
-            try:
-                old_handler = signal.signal(signal.SIGALRM, _timeout_handler)
-                signal.alarm(timeout)
-            except (OSError, AttributeError):
-                use_signal = False
-
-        timeout_ctx = None if use_signal else _TimeoutThread(timeout)
-        if timeout_ctx:
-            timeout_ctx.__enter__()
-
         sys.stdout = stdout_capture
         exec(code, namespace)  # noqa: S102
-        sys.stdout = old_stdout
 
         shape = _find_result(namespace, code)
         output = stdout_capture.getvalue()
@@ -322,10 +340,8 @@ def execute_code(code: str, timeout: int = EXECUTION_TIMEOUT) -> ExecutionResult
         return ExecutionResult(shape=shape, output=output, namespace=namespace)
 
     except ExecutionError:
-        sys.stdout = old_stdout
         raise
     except Exception as e:
-        sys.stdout = old_stdout
         tb = traceback.format_exc()
         return ExecutionResult(
             shape=None,
@@ -334,11 +350,9 @@ def execute_code(code: str, timeout: int = EXECUTION_TIMEOUT) -> ExecutionResult
             error=f"{type(e).__name__}: {e}\n\n{tb}",
         )
     finally:
-        if use_signal:
-            try:
-                signal.alarm(0)
-                signal.signal(signal.SIGALRM, old_handler)
-            except (OSError, AttributeError, UnboundLocalError):
-                pass
-        elif timeout_ctx:
-            timeout_ctx.__exit__(None, None, None)
+        sys.stdout = old_stdout
+        try:
+            signal.alarm(0)
+            signal.signal(signal.SIGALRM, old_handler)
+        except (OSError, AttributeError, UnboundLocalError):
+            pass
