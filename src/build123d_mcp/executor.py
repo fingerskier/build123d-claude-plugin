@@ -1,9 +1,12 @@
 """Sandboxed build123d code execution engine."""
 
 import ast
+import logging
 import signal
 import traceback
 from typing import Any
+
+logger = logging.getLogger(__name__)
 
 # Modules allowed in executed code
 ALLOWED_MODULES = frozenset({
@@ -54,6 +57,7 @@ def _validate_ast(code: str) -> None:
     try:
         tree = ast.parse(code)
     except SyntaxError as e:
+        logger.debug("Syntax error in submitted code: %s", e)
         raise ExecutionError(f"Syntax error: {e}") from e
 
     for node in ast.walk(tree):
@@ -62,6 +66,7 @@ def _validate_ast(code: str) -> None:
             for alias in node.names:
                 root_module = alias.name.split(".")[0]
                 if root_module not in ALLOWED_MODULES:
+                    logger.warning("Blocked import attempt: %s", alias.name)
                     raise SecurityError(
                         f"Import of '{alias.name}' is not allowed. "
                         f"Allowed modules: {', '.join(sorted(ALLOWED_MODULES))}"
@@ -70,6 +75,7 @@ def _validate_ast(code: str) -> None:
             if node.module:
                 root_module = node.module.split(".")[0]
                 if root_module not in ALLOWED_MODULES:
+                    logger.warning("Blocked import attempt: from %s", node.module)
                     raise SecurityError(
                         f"Import from '{node.module}' is not allowed. "
                         f"Allowed modules: {', '.join(sorted(ALLOWED_MODULES))}"
@@ -81,6 +87,7 @@ def _validate_ast(code: str) -> None:
                 and node.attr.endswith("__")
                 and node.attr not in ("__init__", "__name__", "__class__", "__doc__")
             ):
+                logger.warning("Blocked dunder access: %s", node.attr)
                 raise SecurityError(
                     f"Access to dunder attribute '{node.attr}' is not allowed."
                 )
@@ -142,17 +149,17 @@ def _execute_in_process(code: str, timeout: int) -> ExecutionResult:
         try:
             return future.result(timeout=timeout)
         except concurrent.futures.TimeoutError:
+            logger.warning("Code execution timed out after %ds (process-based)", timeout)
             raise ExecutionError(
                 f"Code execution timed out after {timeout} seconds."
             )
 
 
 def _run_sandboxed(code: str) -> ExecutionResult:
-    """Entry point for subprocess execution — validates and runs the code."""
+    """Entry point for subprocess execution — runs pre-validated code."""
     import io
     import sys
 
-    _validate_ast(code)
     namespace = _make_namespace()
     stdout_capture = io.StringIO()
     old_stdout = sys.stdout
@@ -171,6 +178,7 @@ def _run_sandboxed(code: str) -> ExecutionResult:
             )
         return ExecutionResult(shape=shape, output=output, namespace={})
     except Exception as e:
+        logger.error("Execution error in sandboxed code: %s: %s", type(e).__name__, e)
         tb = traceback.format_exc()
         return ExecutionResult(
             shape=None,
@@ -292,6 +300,8 @@ def execute_code(code: str, timeout: int = EXECUTION_TIMEOUT) -> ExecutionResult
     Returns:
         ExecutionResult with the shape, output, and any errors.
     """
+    logger.debug("Executing code (%d chars, timeout=%ds)", len(code), timeout)
+
     # Validate AST for security
     _validate_ast(code)
 
@@ -308,6 +318,7 @@ def execute_code(code: str, timeout: int = EXECUTION_TIMEOUT) -> ExecutionResult
     import threading
 
     use_signal = threading.current_thread() is threading.main_thread()
+    logger.debug("Main thread: %s, using %s timeout", use_signal, "signal" if use_signal else "process")
 
     if use_signal:
         try:
@@ -329,6 +340,7 @@ def execute_code(code: str, timeout: int = EXECUTION_TIMEOUT) -> ExecutionResult
         output = stdout_capture.getvalue()
 
         if shape is None:
+            logger.info("Code executed but no shape found in result")
             return ExecutionResult(
                 shape=None,
                 output=output,
@@ -337,11 +349,13 @@ def execute_code(code: str, timeout: int = EXECUTION_TIMEOUT) -> ExecutionResult
                 "Assign a build123d shape to 'result' or use a BuildPart context manager.",
             )
 
+        logger.info("Code executed successfully, shape found")
         return ExecutionResult(shape=shape, output=output, namespace=namespace)
 
     except ExecutionError:
         raise
     except Exception as e:
+        logger.error("Execution error: %s: %s", type(e).__name__, e)
         tb = traceback.format_exc()
         return ExecutionResult(
             shape=None,

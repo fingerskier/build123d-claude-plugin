@@ -1,7 +1,10 @@
 """Export build123d shapes to STL, STEP, and extract model properties."""
 
+import logging
 from pathlib import Path
 from typing import Any
+
+logger = logging.getLogger(__name__)
 
 
 def get_model_properties(shape: Any) -> dict[str, Any]:
@@ -22,17 +25,20 @@ def get_model_properties(shape: Any) -> dict[str, Any]:
                 "z": round(bb.max.Z - bb.min.Z, 4),
             },
         }
-    except Exception:
+    except Exception as e:
+        logger.debug("Could not get bounding_box: %s", e)
         props["bounding_box"] = None
 
     try:
         props["volume"] = round(shape.volume, 4)
-    except Exception:
+    except Exception as e:
+        logger.debug("Could not get volume: %s", e)
         props["volume"] = None
 
     try:
         props["area"] = round(shape.area, 4)
-    except Exception:
+    except Exception as e:
+        logger.debug("Could not get area: %s", e)
         props["area"] = None
 
     # Topology counts
@@ -50,7 +56,8 @@ def get_model_properties(shape: Any) -> dict[str, Any]:
                     props[label] = len(items())
                 else:
                     props[label] = len(items)
-        except Exception:
+        except Exception as e:
+            logger.debug("Could not get %s: %s", label, e)
             props[label] = None
 
     return props
@@ -79,6 +86,7 @@ def export_stl(
     path.parent.mkdir(parents=True, exist_ok=True)
 
     b3d_export_stl(shape, str(path), tolerance=tolerance, angular_tolerance=angular_tolerance)
+    logger.info("Exported STL to %s (tolerance=%s)", path, tolerance)
     return path
 
 
@@ -98,6 +106,7 @@ def export_step(shape: Any, file_path: str | Path) -> Path:
     path.parent.mkdir(parents=True, exist_ok=True)
 
     b3d_export_step(shape, str(path))
+    logger.info("Exported STEP to %s", path)
     return path
 
 

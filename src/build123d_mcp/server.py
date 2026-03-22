@@ -3,6 +3,7 @@
 import argparse
 import asyncio
 import json
+import logging
 import sys
 from pathlib import Path
 from typing import Any
@@ -14,6 +15,8 @@ from mcp.types import TextContent, ImageContent, Tool
 from build123d_mcp.executor import execute_code, ExecutionError, SecurityError
 from build123d_mcp.exporter import export_stl, export_step, get_model_properties, properties_summary
 from build123d_mcp.renderer import render_png_base64, render_svg, save_png, save_svg
+
+logger = logging.getLogger(__name__)
 
 # ---------------------------------------------------------------------------
 # Session state: in-memory store of named models
@@ -35,6 +38,7 @@ def _safe_path(file_path: str) -> Path:
     out_dir = _ensure_output_dir()
     full = (out_dir / file_path).resolve()
     if not full.is_relative_to(out_dir.resolve()):
+        logger.warning("Path traversal attempt: %s", file_path)
         raise ValueError(
             f"Path '{file_path}' resolves outside the output directory."
         )
@@ -183,6 +187,7 @@ async def list_tools() -> list[Tool]:
 
 @server.call_tool()
 async def call_tool(name: str, arguments: dict[str, Any]) -> list[TextContent | ImageContent]:
+    logger.debug("Tool call: %s", name)
     if name == "execute_build123d":
         return await _handle_execute(arguments)
     elif name == "export_stl":
@@ -198,6 +203,7 @@ async def call_tool(name: str, arguments: dict[str, Any]) -> list[TextContent | 
     elif name == "delete_model":
         return await _handle_delete_model(arguments)
     else:
+        logger.warning("Unknown tool requested: %s", name)
         return [TextContent(type="text", text=f"Unknown tool: {name}")]
 
 
@@ -212,17 +218,21 @@ async def _handle_execute(args: dict[str, Any]) -> list[TextContent]:
     try:
         result = await asyncio.to_thread(execute_code, code)
     except SecurityError as e:
+        logger.warning("Security error for model '%s': %s", model_name, e)
         return [TextContent(type="text", text=f"Security error: {e}")]
     except ExecutionError as e:
+        logger.error("Execution error for model '%s': %s", model_name, e)
         return [TextContent(type="text", text=f"Execution error: {e}")]
 
     if not result.success:
+        logger.warning("Execution failed for model '%s': %s", model_name, result.error)
         msg = f"Execution failed:\n{result.error}"
         if result.output:
             msg += f"\n\nOutput:\n{result.output}"
         return [TextContent(type="text", text=msg)]
 
     _models[model_name] = result.shape
+    logger.info("Model '%s' created successfully", model_name)
     summary = properties_summary(result.shape)
     msg = f"Model '{model_name}' created successfully.\n\n{summary}"
     if result.output:
@@ -245,6 +255,7 @@ async def _handle_export_stl(args: dict[str, Any]) -> list[TextContent]:
         size_kb = result_path.stat().st_size / 1024
         return [TextContent(type="text", text=f"Exported STL to {result_path} ({size_kb:.1f} KB)")]
     except Exception as e:
+        logger.error("STL export failed for '%s': %s", model_name, e, exc_info=True)
         return [TextContent(type="text", text=f"Export failed: {e}")]
 
 
@@ -262,6 +273,7 @@ async def _handle_export_step(args: dict[str, Any]) -> list[TextContent]:
         size_kb = result_path.stat().st_size / 1024
         return [TextContent(type="text", text=f"Exported STEP to {result_path} ({size_kb:.1f} KB)")]
     except Exception as e:
+        logger.error("STEP export failed for '%s': %s", model_name, e, exc_info=True)
         return [TextContent(type="text", text=f"Export failed: {e}")]
 
 
@@ -293,6 +305,7 @@ async def _handle_render_image(args: dict[str, Any]) -> list[TextContent | Image
 
         return results
     except Exception as e:
+        logger.error("Render failed for '%s': %s", model_name, e, exc_info=True)
         return [TextContent(type="text", text=f"Render failed: {e}")]
 
 
@@ -306,6 +319,7 @@ async def _handle_list_models(args: dict[str, Any]) -> list[TextContent]:
             bb = shape.bounding_box()
             size = f"{bb.max.X - bb.min.X:.1f} x {bb.max.Y - bb.min.Y:.1f} x {bb.max.Z - bb.min.Z:.1f} mm"
         except Exception:
+            logger.debug("Could not get bounding box for '%s'", name)
             size = "unknown size"
         lines.append(f"  - {name}: {size}")
 
@@ -343,10 +357,22 @@ def main() -> None:
         default="./cad-output",
         help="Directory for exported files (default: ./cad-output)",
     )
+    parser.add_argument(
+        "-v", "--verbose",
+        action="store_true",
+        help="Enable debug logging",
+    )
     args = parser.parse_args()
+
+    logging.basicConfig(
+        level=logging.DEBUG if args.verbose else logging.INFO,
+        format="%(asctime)s [%(levelname)s] %(name)s: %(message)s",
+        stream=sys.stderr,
+    )
 
     global _output_dir
     _output_dir = Path(args.output_dir).resolve()
+    logger.info("Starting build123d MCP server, output_dir=%s", _output_dir)
 
     async def run() -> None:
         async with stdio_server() as (read_stream, write_stream):

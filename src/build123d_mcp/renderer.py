@@ -2,8 +2,11 @@
 
 import base64
 import io
+import logging
 import math
 from typing import Any
+
+logger = logging.getLogger(__name__)
 
 # Standard view directions as (eye_x, eye_y, eye_z) vectors
 VIEW_ANGLES: dict[str, tuple[float, float, float]] = {
@@ -59,13 +62,14 @@ def render_svg(
             canvas_height=height,
         )
     except TypeError:
-        # Fallback if export_svg API doesn't support canvas_width/height
+        logger.debug("export_svg doesn't support canvas_width/height, falling back")
         try:
             svg_content = export_svg(
                 shape,
                 viewport_origin=Vector(view_dir[0] * 100, view_dir[1] * 100, view_dir[2] * 100),
             )
         except TypeError:
+            logger.debug("export_svg doesn't support viewport_origin, using defaults")
             svg_content = export_svg(shape)
 
     return svg_content
@@ -102,6 +106,7 @@ def render_png(
         )
         return png_bytes
     except ImportError:
+        logger.warning("CairoSVG not available, using Pillow placeholder")
         # Fallback: use Pillow to create a simple placeholder
         from PIL import Image, ImageDraw, ImageFont
 
@@ -150,6 +155,7 @@ def save_svg(shape: Any, file_path: str, view: str = "iso", **kwargs: Any) -> st
     path = Path(file_path)
     path.parent.mkdir(parents=True, exist_ok=True)
     path.write_text(svg_content, encoding="utf-8")
+    logger.debug("Saved SVG to %s", path)
     return str(path)
 
 
@@ -165,4 +171,5 @@ def save_png(shape: Any, file_path: str, view: str = "iso", **kwargs: Any) -> st
     path = Path(file_path)
     path.parent.mkdir(parents=True, exist_ok=True)
     path.write_bytes(png_bytes)
+    logger.debug("Saved PNG to %s", path)
     return str(path)
