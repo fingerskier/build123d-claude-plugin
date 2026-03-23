@@ -1,5 +1,7 @@
 """Sandboxed build123d code execution engine."""
 
+from __future__ import annotations
+
 import ast
 import logging
 import signal

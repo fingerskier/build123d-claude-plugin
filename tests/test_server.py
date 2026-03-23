@@ -1,7 +1,7 @@
 """Tests for the MCP server tool handlers."""
 
 import pytest
-from build123d_mcp.server import call_tool, _models
+from build123d_mcp.server import call_tool, _models, _safe_path
 
 
 @pytest.fixture(autouse=True)
@@ -82,3 +82,72 @@ async def test_export_stl_missing_model():
 async def test_export_step_missing_model():
     result = await call_tool("export_step", {"model_name": "nonexistent"})
     assert "not found" in result[0].text
+
+
+# ---------------------------------------------------------------------------
+# Input validation tests
+# ---------------------------------------------------------------------------
+
+@pytest.mark.asyncio
+async def test_execute_code_too_large():
+    result = await call_tool("execute_build123d", {
+        "code": "x = 1\n" * 20_000,
+        "model_name": "big",
+    })
+    assert "too large" in result[0].text.lower()
+    assert "big" not in _models
+
+
+@pytest.mark.asyncio
+async def test_export_stl_tolerance_too_small():
+    await call_tool("execute_build123d", {"code": "result = Box(10,10,10)", "model_name": "t"})
+    result = await call_tool("export_stl", {"model_name": "t", "tolerance": 0.00001})
+    assert "Tolerance must be" in result[0].text
+
+
+@pytest.mark.asyncio
+async def test_export_stl_tolerance_negative():
+    await call_tool("execute_build123d", {"code": "result = Box(10,10,10)", "model_name": "t"})
+    result = await call_tool("export_stl", {"model_name": "t", "tolerance": -1})
+    assert "Tolerance must be" in result[0].text
+
+
+@pytest.mark.asyncio
+async def test_render_image_width_too_large():
+    await call_tool("execute_build123d", {"code": "result = Box(10,10,10)", "model_name": "t"})
+    result = await call_tool("render_image", {"model_name": "t", "width": 10000})
+    assert "Width must be" in result[0].text
+
+
+@pytest.mark.asyncio
+async def test_render_image_height_zero():
+    await call_tool("execute_build123d", {"code": "result = Box(10,10,10)", "model_name": "t"})
+    result = await call_tool("render_image", {"model_name": "t", "height": 0})
+    assert "Height must be" in result[0].text
+
+
+@pytest.mark.asyncio
+async def test_render_image_invalid_view():
+    await call_tool("execute_build123d", {"code": "result = Box(10,10,10)", "model_name": "t"})
+    result = await call_tool("render_image", {"model_name": "t", "view": "diagonal"})
+    assert "Invalid view" in result[0].text
+
+
+@pytest.mark.asyncio
+async def test_render_image_missing_model():
+    result = await call_tool("render_image", {"model_name": "nonexistent"})
+    assert "not found" in result[0].text
+
+
+# ---------------------------------------------------------------------------
+# _safe_path tests
+# ---------------------------------------------------------------------------
+
+def test_safe_path_rejects_traversal():
+    with pytest.raises(ValueError, match="outside the output directory"):
+        _safe_path("../../etc/passwd")
+
+
+def test_safe_path_allows_simple_name():
+    result = _safe_path("model.stl")
+    assert result.name == "model.stl"

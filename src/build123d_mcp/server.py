@@ -24,6 +24,14 @@ logger = logging.getLogger(__name__)
 _models: dict[str, Any] = {}
 _output_dir: Path = Path("./cad-output")
 
+# Validation bounds
+MAX_CODE_LENGTH = 102_400  # 100 KB
+MIN_IMAGE_DIM = 1
+MAX_IMAGE_DIM = 4096
+MIN_TOLERANCE = 0.0001
+MAX_TOLERANCE = 1.0
+VALID_VIEWS = {"iso", "front", "back", "right", "left", "top", "bottom", "iso_back"}
+
 
 def _ensure_output_dir() -> Path:
     _output_dir.mkdir(parents=True, exist_ok=True)
@@ -215,6 +223,9 @@ async def _handle_execute(args: dict[str, Any]) -> list[TextContent]:
     code = args["code"]
     model_name = args["model_name"]
 
+    if len(code) > MAX_CODE_LENGTH:
+        return [TextContent(type="text", text=f"Code too large ({len(code)} chars). Maximum is {MAX_CODE_LENGTH}.")]
+
     try:
         result = await asyncio.to_thread(execute_code, code)
     except SecurityError as e:
@@ -248,6 +259,9 @@ async def _handle_export_stl(args: dict[str, Any]) -> list[TextContent]:
     shape = _models[model_name]
     file_path = args.get("file_path", f"{model_name}.stl")
     tolerance = args.get("tolerance", 0.001)
+
+    if not (MIN_TOLERANCE <= tolerance <= MAX_TOLERANCE):
+        return [TextContent(type="text", text=f"Tolerance must be between {MIN_TOLERANCE} and {MAX_TOLERANCE}, got {tolerance}.")]
 
     try:
         full_path = _safe_path(file_path)
@@ -287,6 +301,13 @@ async def _handle_render_image(args: dict[str, Any]) -> list[TextContent | Image
     width = args.get("width", 800)
     height = args.get("height", 600)
     save_path = args.get("save_path")
+
+    if view not in VALID_VIEWS:
+        return [TextContent(type="text", text=f"Invalid view '{view}'. Must be one of: {', '.join(sorted(VALID_VIEWS))}")]
+    if not (MIN_IMAGE_DIM <= width <= MAX_IMAGE_DIM):
+        return [TextContent(type="text", text=f"Width must be between {MIN_IMAGE_DIM} and {MAX_IMAGE_DIM}, got {width}.")]
+    if not (MIN_IMAGE_DIM <= height <= MAX_IMAGE_DIM):
+        return [TextContent(type="text", text=f"Height must be between {MIN_IMAGE_DIM} and {MAX_IMAGE_DIM}, got {height}.")]
 
     try:
         b64_png = await asyncio.to_thread(render_png_base64, shape, view=view, width=width, height=height)
