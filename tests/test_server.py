@@ -1,7 +1,9 @@
 """Tests for the MCP server tool handlers."""
 
 import pytest
-from build123d_mcp.server import call_tool, _models, _safe_path
+
+pytest.importorskip("mcp", reason="mcp not installed")
+from build123d_mcp.server import call_tool, _models, _safe_path  # noqa: E402
 
 
 @pytest.fixture(autouse=True)

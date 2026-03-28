@@ -5,6 +5,7 @@ from build123d_mcp.executor import execute_code, SecurityError, ExecutionError, 
 
 
 class TestASTValidation:
+    """Pure-logic tests that don't need build123d installed."""
     def test_allowed_imports(self):
         _validate_ast("import math")
         _validate_ast("from build123d import Box")
@@ -31,8 +32,24 @@ class TestASTValidation:
         with pytest.raises(ExecutionError, match="Syntax error"):
             _validate_ast("def foo(")
 
+    def test_security_blocks_os_via_execute(self):
+        """execute_code raises SecurityError before needing build123d."""
+        with pytest.raises(SecurityError):
+            execute_code("import os; os.system('echo pwned')")
 
+
+_has_build123d = pytest.importorskip is not None  # just a namespace anchor
+try:
+    import build123d as _b123d  # noqa: F401
+    _has_build123d = True
+except ImportError:
+    _has_build123d = False
+
+
+@pytest.mark.skipif(not _has_build123d, reason="build123d not installed")
 class TestExecution:
+    """Integration tests that require build123d."""
+
     def test_simple_box(self):
         result = execute_code(
             "result = Box(10, 20, 30)",
@@ -67,10 +84,6 @@ result = box - cyl
 """
         result = execute_code(code, timeout=30)
         assert result.success
-
-    def test_security_blocks_os(self):
-        with pytest.raises(SecurityError):
-            execute_code("import os; os.system('echo pwned')")
 
     def test_no_shape_error(self):
         result = execute_code("x = 42", timeout=10)

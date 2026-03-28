@@ -1,13 +1,14 @@
 """Tests for the build123d exporter."""
 
-import json
 import tempfile
 from pathlib import Path
 
 import pytest
-from build123d import Box
 
-from build123d_mcp.exporter import export_stl, export_step, get_model_properties, properties_summary
+pytest.importorskip("build123d", reason="build123d not installed")
+from build123d import Box  # noqa: E402
+
+from build123d_mcp.exporter import export_stl, export_step, get_model_properties, properties_summary  # noqa: E402
 
 
 @pytest.fixture
