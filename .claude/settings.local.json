@@ -12,7 +12,8 @@
       "Bash(brew --prefix python)",
       "Bash(PYTHONPATH=src python3 -m pytest --tb=short)",
       "Bash(PYTHONPATH=src python3 -m pytest tests/test_executor.py -v --tb=short 2>&1)",
-      "Bash(PYTHONPATH=src python3 -m pytest -v --tb=short 2>&1)"
+      "Bash(PYTHONPATH=src python3 -m pytest -v --tb=short 2>&1)",
+      "Bash(git push:*)"
     ]
   }
 }
