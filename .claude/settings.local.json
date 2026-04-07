@@ -5,7 +5,10 @@
       "Bash(python:*)",
       "Bash(pip install:*)",
       "Bash(git add:*)",
-      "Bash(git commit:*)"
+      "Bash(git commit:*)",
+      "mcp__plugin_reqall_reqall__upsert_project",
+      "mcp__plugin_github_github__list_issues",
+      "mcp__plugin_reqall_reqall__list_records"
     ]
   }
 }
