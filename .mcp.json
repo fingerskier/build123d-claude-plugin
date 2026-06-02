@@ -1,0 +1,8 @@
+{
+  "mcpServers": {
+    "build123d": {
+      "command": "uvx",
+      "args": ["build123d-mcp"]
+    }
+  }
+}
