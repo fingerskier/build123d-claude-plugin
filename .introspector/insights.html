@@ -1,0 +1,116 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Insight Graph — 10 nodes</title>
+<style>
+  :root { color-scheme: dark; }
+  body { margin: 0; font: 13px/1.4 system-ui, sans-serif; background: #11141a; color: #e7eaf0; }
+  header { padding: 10px 16px; border-bottom: 1px solid #222b38; }
+  header b { font-size: 15px; }
+  #wrap { display: grid; grid-template-columns: 1fr 260px; height: calc(100vh - 44px); }
+  svg { width: 100%; height: 100%; background: #11141a; }
+  .edge { stroke: #38455a; stroke-width: 1; opacity: 0.5; }
+  .edge.tests { stroke-dasharray: 4 3; }
+  .edge.flow { stroke: #4a5d7a; }
+  .node { cursor: pointer; }
+  .node.dim { opacity: 0.12; }
+  aside { border-left: 1px solid #222b38; padding: 12px; overflow: auto; }
+  .legend h3 { margin: 12px 0 4px; font-size: 12px; text-transform: uppercase; letter-spacing: .05em; color: #9aa6b8; }
+  .legend p { margin: 2px 0; color: #c4ccda; }
+  #tip { position: fixed; pointer-events: none; background: #1b2231; border: 1px solid #2d3a4f; border-radius: 6px; padding: 8px 10px; max-width: 320px; display: none; box-shadow: 0 6px 24px #0008; }
+  #tip code { color: #9ad; }
+  .flag { display: inline-block; background: #33405a; border-radius: 4px; padding: 0 6px; margin: 2px 2px 0 0; font-size: 11px; }
+</style>
+</head>
+<body>
+<header><b>🧭 Insight Graph</b> — 10 nodes · 19 edges · deterministic baseline</header>
+<div id="wrap">
+  <svg id="graph" viewBox="0 0 1200 800" preserveAspectRatio="xMidYMid meet"></svg>
+  <aside class="legend">
+    <h3>Size</h3><p>Node radius ≈ file size (LOC / words).</p>
+    <h3>Border</h3><p>Hue + width = test coverage (code) or structural integrity (prose). Green healthy → red needs work.</p>
+    <h3>Fill</h3><p>Opacity = documentation amount / completeness. Hue = quality (AI). Gray = not yet AI-scored.</p>
+    <h3>Edges</h3><p>import · contains · tests (dashed) · flow · link.</p>
+  </aside>
+</div>
+<div id="tip"></div>
+<script type="application/json" id="insights-data">{"generatedAt":"2026-06-03T21:44:58.159Z","nodes":[{"id":"CLAUDE.md","kind":"doc","path":"CLAUDE.md","layout":{"x":60,"y":60},"scores":{"size":724,"test":null,"docAmount":1,"structure":1,"quality":null},"flags":[],"notes":[]},{"id":"README.md","kind":"doc","path":"README.md","layout":{"x":60,"y":740},"scores":{"size":423,"test":null,"docAmount":1,"structure":1,"quality":null},"flags":[],"notes":[]},{"id":"examples/bracket.py","kind":"code","path":"examples/bracket.py","layout":{"x":600,"y":60},"scores":{"size":60,"test":0,"docAmount":0.5833333333333334,"structure":null,"quality":null},"flags":["untested","orphan"],"notes":[]},{"id":"examples/enclosure.py","kind":"code","path":"examples/enclosure.py","layout":{"x":600,"y":400},"scores":{"size":36,"test":0,"docAmount":0.8333333333333333,"structure":null,"quality":null},"flags":["untested","orphan"],"notes":[]},{"id":"examples/simple_box.py","kind":"code","path":"examples/simple_box.py","layout":{"x":600,"y":740},"scores":{"size":17,"test":0,"docAmount":0.5882352941176471,"structure":null,"quality":null},"flags":["untested","orphan"],"notes":[]},{"id":"src/build123d_mcp/__init__.py","kind":"code","path":"src/build123d_mcp/__init__.py","layout":{"x":1140,"y":60},"scores":{"size":4,"test":1,"docAmount":0,"structure":null,"quality":null},"flags":[],"notes":[]},{"id":"src/build123d_mcp/executor.py","kind":"code","path":"src/build123d_mcp/executor.py","layout":{"x":1140,"y":230},"scores":{"size":375,"test":1,"docAmount":0.2533333333333333,"structure":null,"quality":null},"flags":[],"notes":[]},{"id":"src/build123d_mcp/exporter.py","kind":"code","path":"src/build123d_mcp/exporter.py","layout":{"x":1140,"y":400},"scores":{"size":142,"test":1,"docAmount":0.035211267605633804,"structure":null,"quality":null},"flags":[],"notes":[]},{"id":"src/build123d_mcp/renderer.py","kind":"code","path":"src/build123d_mcp/renderer.py","layout":{"x":1140,"y":570},"scores":{"size":176,"test":0,"docAmount":0.08522727272727272,"structure":null,"quality":null},"flags":["untested"],"notes":[]},{"id":"src/build123d_mcp/server.py","kind":"code","path":"src/build123d_mcp/server.py","layout":{"x":1140,"y":740},"scores":{"size":407,"test":1,"docAmount":0.1597051597051597,"structure":null,"quality":null},"flags":["oversized"],"notes":[]}],"edges":[{"from":"tests/__init__.py","to":"src/build123d_mcp/__init__.py","type":"tests"},{"from":"tests/test_executor.py","to":"src/build123d_mcp/executor.py","type":"tests"},{"from":"tests/test_exporter.py","to":"src/build123d_mcp/exporter.py","type":"tests"},{"from":"tests/test_server.py","to":"src/build123d_mcp/server.py","type":"tests"},{"from":"CLAUDE.md","to":"README.md","type":"flow"},{"from":"README.md","to":".gitignore","type":"contains"},{"from":"README.md","to":"CLAUDE.md","type":"contains"},{"from":"README.md","to":"LICENSE","type":"contains"},{"from":"README.md","to":"bash.exe.stackdump","type":"contains"},{"from":"README.md","to":"pyproject.toml","type":"contains"},{"from":"README.md","to":"skidl.erc","type":"contains"},{"from":"README.md","to":"skidl.log","type":"contains"},{"from":"src/build123d_mcp/__init__.py","to":"src/build123d_mcp/executor.py","type":"contains"},{"from":"src/build123d_mcp/__init__.py","to":"src/build123d_mcp/exporter.py","type":"contains"},{"from":"src/build123d_mcp/__init__.py","to":"src/build123d_mcp/renderer.py","type":"contains"},{"from":"src/build123d_mcp/__init__.py","to":"src/build123d_mcp/server.py","type":"contains"},{"from":"tests/__init__.py","to":"tests/test_executor.py","type":"contains"},{"from":"tests/__init__.py","to":"tests/test_exporter.py","type":"contains"},{"from":"tests/__init__.py","to":"tests/test_server.py","type":"contains"}],"meta":{"nodeCount":10,"edgeCount":19,"aiEnriched":false}}</script>
+<script>
+(function () {
+  var raw = document.getElementById('insights-data').textContent;
+  var data = JSON.parse(raw);
+  var SVGNS = ['http', '://www.w3.org/2000/svg'].join(''); // split avoids the full URL form in source — keeps renderHtml output free of network URL patterns
+  var R_MIN = 4, R_MAX = 48;
+  function clamp01(n){ return n < 0 ? 0 : n > 1 ? 1 : n; }
+  function lerp(a,b,t){ return a + (b-a)*clamp01(t); }
+  function hue(v){ return v == null ? -1 : Math.round(lerp(0,130,v)); }
+  function channels(n){
+    var s = n.scores, basis = n.kind === 'code' ? s.test : s.structure;
+    var r = Math.round(clamp01(Math.sqrt(s.size)/Math.sqrt(2500))*(R_MAX-R_MIN)+R_MIN); // 2500 = SIZE_SCALE_MAX (keep in sync with render-html.ts)
+    return {
+      r: r,
+      stroke: basis == null ? '#7a869a' : 'hsl(' + hue(basis) + ',70%,55%)',
+      sw: Math.round(lerp(1.5,6.5, basis == null ? 0 : basis)*10)/10,
+      fill: s.quality == null ? '#7a869a' : 'hsl(' + hue(s.quality) + ',60%,50%)',
+      fo: Math.round(lerp(0.15,0.75,s.docAmount)*100)/100
+    };
+  }
+  var svg = document.getElementById('graph');
+  var byId = {}; data.nodes.forEach(function(n){ byId[n.id] = n; });
+  var neighbors = {}; data.nodes.forEach(function(n){ neighbors[n.id] = {}; });
+  data.edges.forEach(function(e){
+    if (!byId[e.from] || !byId[e.to]) return;
+    var a = byId[e.from].layout, b = byId[e.to].layout;
+    var line = document.createElementNS(SVGNS,'line');
+    line.setAttribute('x1',a.x); line.setAttribute('y1',a.y);
+    line.setAttribute('x2',b.x); line.setAttribute('y2',b.y);
+    line.setAttribute('class','edge ' + e.type);
+    line.dataset.from = e.from; line.dataset.to = e.to;
+    svg.appendChild(line);
+    if (neighbors[e.from]) neighbors[e.from][e.to] = 1;
+    if (neighbors[e.to]) neighbors[e.to][e.from] = 1;
+  });
+  var tip = document.getElementById('tip');
+  data.nodes.forEach(function(n){
+    var c = channels(n);
+    var g = document.createElementNS(SVGNS,'circle');
+    g.setAttribute('cx', n.layout.x); g.setAttribute('cy', n.layout.y);
+    g.setAttribute('r', c.r);
+    g.setAttribute('fill', c.fill); g.setAttribute('fill-opacity', c.fo);
+    g.setAttribute('stroke', c.stroke); g.setAttribute('stroke-width', c.sw);
+    g.setAttribute('class','node'); g.dataset.id = n.id;
+    g.addEventListener('mousemove', function(ev){
+      tip.style.display='block'; tip.style.left=(ev.clientX+14)+'px'; tip.style.top=(ev.clientY+14)+'px';
+      var fl = n.flags.map(function(f){return '<span class="flag">'+f+'</span>';}).join('');
+      var notes = n.notes.length ? '<p>'+n.notes.join('<br>')+'</p>' : '';
+      // Local file:// artifact: n.path/flags are filesystem/enum-safe; n.notes is
+      // AI-generated but renders in a sandboxed, network-less context. Not HTML-escaped by design.
+      tip.innerHTML = '<code>'+n.path+'</code><br>size '+n.scores.size+
+        ' · test '+n.scores.test+' · docs '+n.scores.docAmount+
+        ' · struct '+n.scores.structure+' · qual '+n.scores.quality+'<br>'+fl+notes;
+    });
+    g.addEventListener('mouseleave', function(){ tip.style.display='none'; });
+    g.addEventListener('click', function(){
+      var keep = neighbors[n.id] || {}; keep[n.id] = 1;
+      document.querySelectorAll('.node').forEach(function(el){
+        el.classList.toggle('dim', !keep[el.dataset.id]);
+      });
+      document.querySelectorAll('.edge').forEach(function(el){
+        var on = el.dataset.from === n.id || el.dataset.to === n.id;
+        el.style.opacity = on ? '0.9' : '0.06';
+      });
+    });
+    svg.appendChild(g);
+  });
+  svg.addEventListener('click', function(ev){
+    if (ev.target === svg) {
+      document.querySelectorAll('.node').forEach(function(el){ el.classList.remove('dim'); });
+      document.querySelectorAll('.edge').forEach(function(el){ el.style.opacity=''; });
+    }
+  });
+})();
+</script>
+</body>
+</html>

@@ -1,0 +1,300 @@
+{
+  "generatedAt": "2026-06-03T21:44:58.159Z",
+  "nodes": [
+    {
+      "id": "CLAUDE.md",
+      "kind": "doc",
+      "path": "CLAUDE.md",
+      "layout": {
+        "x": 60,
+        "y": 60
+      },
+      "scores": {
+        "size": 724,
+        "test": null,
+        "docAmount": 1,
+        "structure": 1,
+        "quality": null
+      },
+      "flags": [],
+      "notes": []
+    },
+    {
+      "id": "README.md",
+      "kind": "doc",
+      "path": "README.md",
+      "layout": {
+        "x": 60,
+        "y": 740
+      },
+      "scores": {
+        "size": 423,
+        "test": null,
+        "docAmount": 1,
+        "structure": 1,
+        "quality": null
+      },
+      "flags": [],
+      "notes": []
+    },
+    {
+      "id": "examples/bracket.py",
+      "kind": "code",
+      "path": "examples/bracket.py",
+      "layout": {
+        "x": 600,
+        "y": 60
+      },
+      "scores": {
+        "size": 60,
+        "test": 0,
+        "docAmount": 0.5833333333333334,
+        "structure": null,
+        "quality": null
+      },
+      "flags": [
+        "untested",
+        "orphan"
+      ],
+      "notes": []
+    },
+    {
+      "id": "examples/enclosure.py",
+      "kind": "code",
+      "path": "examples/enclosure.py",
+      "layout": {
+        "x": 600,
+        "y": 400
+      },
+      "scores": {
+        "size": 36,
+        "test": 0,
+        "docAmount": 0.8333333333333333,
+        "structure": null,
+        "quality": null
+      },
+      "flags": [
+        "untested",
+        "orphan"
+      ],
+      "notes": []
+    },
+    {
+      "id": "examples/simple_box.py",
+      "kind": "code",
+      "path": "examples/simple_box.py",
+      "layout": {
+        "x": 600,
+        "y": 740
+      },
+      "scores": {
+        "size": 17,
+        "test": 0,
+        "docAmount": 0.5882352941176471,
+        "structure": null,
+        "quality": null
+      },
+      "flags": [
+        "untested",
+        "orphan"
+      ],
+      "notes": []
+    },
+    {
+      "id": "src/build123d_mcp/__init__.py",
+      "kind": "code",
+      "path": "src/build123d_mcp/__init__.py",
+      "layout": {
+        "x": 1140,
+        "y": 60
+      },
+      "scores": {
+        "size": 4,
+        "test": 1,
+        "docAmount": 0,
+        "structure": null,
+        "quality": null
+      },
+      "flags": [],
+      "notes": []
+    },
+    {
+      "id": "src/build123d_mcp/executor.py",
+      "kind": "code",
+      "path": "src/build123d_mcp/executor.py",
+      "layout": {
+        "x": 1140,
+        "y": 230
+      },
+      "scores": {
+        "size": 375,
+        "test": 1,
+        "docAmount": 0.2533333333333333,
+        "structure": null,
+        "quality": null
+      },
+      "flags": [],
+      "notes": []
+    },
+    {
+      "id": "src/build123d_mcp/exporter.py",
+      "kind": "code",
+      "path": "src/build123d_mcp/exporter.py",
+      "layout": {
+        "x": 1140,
+        "y": 400
+      },
+      "scores": {
+        "size": 142,
+        "test": 1,
+        "docAmount": 0.035211267605633804,
+        "structure": null,
+        "quality": null
+      },
+      "flags": [],
+      "notes": []
+    },
+    {
+      "id": "src/build123d_mcp/renderer.py",
+      "kind": "code",
+      "path": "src/build123d_mcp/renderer.py",
+      "layout": {
+        "x": 1140,
+        "y": 570
+      },
+      "scores": {
+        "size": 176,
+        "test": 0,
+        "docAmount": 0.08522727272727272,
+        "structure": null,
+        "quality": null
+      },
+      "flags": [
+        "untested"
+      ],
+      "notes": []
+    },
+    {
+      "id": "src/build123d_mcp/server.py",
+      "kind": "code",
+      "path": "src/build123d_mcp/server.py",
+      "layout": {
+        "x": 1140,
+        "y": 740
+      },
+      "scores": {
+        "size": 407,
+        "test": 1,
+        "docAmount": 0.1597051597051597,
+        "structure": null,
+        "quality": null
+      },
+      "flags": [
+        "oversized"
+      ],
+      "notes": []
+    }
+  ],
+  "edges": [
+    {
+      "from": "tests/__init__.py",
+      "to": "src/build123d_mcp/__init__.py",
+      "type": "tests"
+    },
+    {
+      "from": "tests/test_executor.py",
+      "to": "src/build123d_mcp/executor.py",
+      "type": "tests"
+    },
+    {
+      "from": "tests/test_exporter.py",
+      "to": "src/build123d_mcp/exporter.py",
+      "type": "tests"
+    },
+    {
+      "from": "tests/test_server.py",
+      "to": "src/build123d_mcp/server.py",
+      "type": "tests"
+    },
+    {
+      "from": "CLAUDE.md",
+      "to": "README.md",
+      "type": "flow"
+    },
+    {
+      "from": "README.md",
+      "to": ".gitignore",
+      "type": "contains"
+    },
+    {
+      "from": "README.md",
+      "to": "CLAUDE.md",
+      "type": "contains"
+    },
+    {
+      "from": "README.md",
+      "to": "LICENSE",
+      "type": "contains"
+    },
+    {
+      "from": "README.md",
+      "to": "bash.exe.stackdump",
+      "type": "contains"
+    },
+    {
+      "from": "README.md",
+      "to": "pyproject.toml",
+      "type": "contains"
+    },
+    {
+      "from": "README.md",
+      "to": "skidl.erc",
+      "type": "contains"
+    },
+    {
+      "from": "README.md",
+      "to": "skidl.log",
+      "type": "contains"
+    },
+    {
+      "from": "src/build123d_mcp/__init__.py",
+      "to": "src/build123d_mcp/executor.py",
+      "type": "contains"
+    },
+    {
+      "from": "src/build123d_mcp/__init__.py",
+      "to": "src/build123d_mcp/exporter.py",
+      "type": "contains"
+    },
+    {
+      "from": "src/build123d_mcp/__init__.py",
+      "to": "src/build123d_mcp/renderer.py",
+      "type": "contains"
+    },
+    {
+      "from": "src/build123d_mcp/__init__.py",
+      "to": "src/build123d_mcp/server.py",
+      "type": "contains"
+    },
+    {
+      "from": "tests/__init__.py",
+      "to": "tests/test_executor.py",
+      "type": "contains"
+    },
+    {
+      "from": "tests/__init__.py",
+      "to": "tests/test_exporter.py",
+      "type": "contains"
+    },
+    {
+      "from": "tests/__init__.py",
+      "to": "tests/test_server.py",
+      "type": "contains"
+    }
+  ],
+  "meta": {
+    "nodeCount": 10,
+    "edgeCount": 19,
+    "aiEnriched": false
+  }
+}

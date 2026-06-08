@@ -1,0 +1,412 @@
+{
+  "name": "build123d-claude-plugin",
+  "root": "C:\\dev\\fingerskier\\agent\\Claude\\build123d-claude-plugin",
+  "generatedAt": "2026-06-03T21:44:58.159Z",
+  "mode": "code",
+  "totals": {
+    "files": 21,
+    "code": 8,
+    "test": 4,
+    "docs": 2,
+    "config": 3,
+    "asset": 0,
+    "other": 4,
+    "loc": 1942
+  },
+  "languages": {
+    "JSON": 1,
+    "Markdown": 2,
+    "Python": 12,
+    "TOML": 1
+  },
+  "modules": [
+    {
+      "name": "src/build123d_mcp",
+      "path": "src/build123d_mcp",
+      "fileCount": 5,
+      "loc": 1104,
+      "languages": {
+        "Python": 5
+      },
+      "codeFiles": [
+        "src/build123d_mcp/__init__.py",
+        "src/build123d_mcp/executor.py",
+        "src/build123d_mcp/exporter.py",
+        "src/build123d_mcp/renderer.py",
+        "src/build123d_mcp/server.py"
+      ],
+      "testFiles": [],
+      "docFiles": []
+    },
+    {
+      "name": "root",
+      "path": ".",
+      "fileCount": 8,
+      "loc": 395,
+      "languages": {
+        "Markdown": 2,
+        "TOML": 1
+      },
+      "codeFiles": [],
+      "testFiles": [],
+      "docFiles": [
+        "CLAUDE.md",
+        "README.md"
+      ]
+    },
+    {
+      "name": "tests",
+      "path": "tests",
+      "fileCount": 4,
+      "loc": 315,
+      "languages": {
+        "Python": 4
+      },
+      "codeFiles": [],
+      "testFiles": [
+        "tests/__init__.py",
+        "tests/test_executor.py",
+        "tests/test_exporter.py",
+        "tests/test_server.py"
+      ],
+      "docFiles": []
+    },
+    {
+      "name": "examples",
+      "path": "examples",
+      "fileCount": 3,
+      "loc": 113,
+      "languages": {
+        "Python": 3
+      },
+      "codeFiles": [
+        "examples/bracket.py",
+        "examples/enclosure.py",
+        "examples/simple_box.py"
+      ],
+      "testFiles": [],
+      "docFiles": []
+    },
+    {
+      "name": ".claude",
+      "path": ".claude",
+      "fileCount": 1,
+      "loc": 15,
+      "languages": {
+        "JSON": 1
+      },
+      "codeFiles": [],
+      "testFiles": [],
+      "docFiles": []
+    }
+  ],
+  "tests": [
+    {
+      "test": "tests/__init__.py",
+      "targets": [
+        "src/build123d_mcp/__init__.py"
+      ]
+    },
+    {
+      "test": "tests/test_executor.py",
+      "targets": [
+        "src/build123d_mcp/executor.py"
+      ]
+    },
+    {
+      "test": "tests/test_exporter.py",
+      "targets": [
+        "src/build123d_mcp/exporter.py"
+      ]
+    },
+    {
+      "test": "tests/test_server.py",
+      "targets": [
+        "src/build123d_mcp/server.py"
+      ]
+    }
+  ],
+  "docs": [
+    {
+      "path": "CLAUDE.md",
+      "title": "Build123d CAD Modeling Plugin",
+      "headings": [
+        {
+          "level": 1,
+          "title": "Build123d CAD Modeling Plugin",
+          "line": 1
+        },
+        {
+          "level": 2,
+          "title": "MCP Tools Available",
+          "line": 5
+        },
+        {
+          "level": 2,
+          "title": "Build123d Quick Reference",
+          "line": 17
+        },
+        {
+          "level": 3,
+          "title": "Two API Modes",
+          "line": 19
+        },
+        {
+          "level": 3,
+          "title": "Common 3D Shapes",
+          "line": 38
+        },
+        {
+          "level": 3,
+          "title": "Common 2D Sketch Shapes",
+          "line": 48
+        },
+        {
+          "level": 3,
+          "title": "Key Operations",
+          "line": 59
+        },
+        {
+          "level": 3,
+          "title": "Boolean Operations",
+          "line": 73
+        },
+        {
+          "level": 3,
+          "title": "Positioning and Transformation",
+          "line": 77
+        },
+        {
+          "level": 3,
+          "title": "Selecting Faces and Edges",
+          "line": 93
+        },
+        {
+          "level": 3,
+          "title": "Patterns and Arrays",
+          "line": 110
+        },
+        {
+          "level": 2,
+          "title": "Best Practices",
+          "line": 121
+        },
+        {
+          "level": 2,
+          "title": "Code Template",
+          "line": 130
+        },
+        {
+          "level": 2,
+          "title": "Export Guidelines",
+          "line": 151
+        }
+      ]
+    },
+    {
+      "path": "README.md",
+      "title": "build123d-claude-plugin",
+      "headings": [
+        {
+          "level": 1,
+          "title": "build123d-claude-plugin",
+          "line": 1
+        },
+        {
+          "level": 2,
+          "title": "Features",
+          "line": 5
+        },
+        {
+          "level": 2,
+          "title": "Installation",
+          "line": 17
+        },
+        {
+          "level": 3,
+          "title": "Dependencies",
+          "line": 23
+        },
+        {
+          "level": 2,
+          "title": "Setup with Claude Code",
+          "line": 31
+        },
+        {
+          "level": 2,
+          "title": "Usage",
+          "line": 59
+        },
+        {
+          "level": 2,
+          "title": "Project Structure",
+          "line": 75
+        },
+        {
+          "level": 2,
+          "title": "Running Tests",
+          "line": 92
+        },
+        {
+          "level": 2,
+          "title": "Security",
+          "line": 99
+        },
+        {
+          "level": 2,
+          "title": "License",
+          "line": 107
+        }
+      ]
+    }
+  ],
+  "files": [
+    {
+      "path": ".claude/settings.local.json",
+      "kind": "config",
+      "language": "JSON",
+      "size": 358,
+      "loc": 15
+    },
+    {
+      "path": ".gitignore",
+      "kind": "config",
+      "language": null,
+      "size": 268,
+      "loc": 33
+    },
+    {
+      "path": "CLAUDE.md",
+      "kind": "docs",
+      "language": "Markdown",
+      "size": 5262,
+      "loc": 156
+    },
+    {
+      "path": "LICENSE",
+      "kind": "other",
+      "language": null,
+      "size": 1090,
+      "loc": 22
+    },
+    {
+      "path": "README.md",
+      "kind": "docs",
+      "language": "Markdown",
+      "size": 3478,
+      "loc": 110
+    },
+    {
+      "path": "bash.exe.stackdump",
+      "kind": "other",
+      "language": null,
+      "size": 1196,
+      "loc": 29
+    },
+    {
+      "path": "examples/bracket.py",
+      "kind": "code",
+      "language": "Python",
+      "size": 1775,
+      "loc": 60
+    },
+    {
+      "path": "examples/enclosure.py",
+      "kind": "code",
+      "language": "Python",
+      "size": 1209,
+      "loc": 36
+    },
+    {
+      "path": "examples/simple_box.py",
+      "kind": "code",
+      "language": "Python",
+      "size": 315,
+      "loc": 17
+    },
+    {
+      "path": "pyproject.toml",
+      "kind": "config",
+      "language": "TOML",
+      "size": 718,
+      "loc": 35
+    },
+    {
+      "path": "skidl.erc",
+      "kind": "other",
+      "language": null,
+      "size": 0,
+      "loc": 0
+    },
+    {
+      "path": "skidl.log",
+      "kind": "other",
+      "language": null,
+      "size": 1891,
+      "loc": 10
+    },
+    {
+      "path": "src/build123d_mcp/__init__.py",
+      "kind": "code",
+      "language": "Python",
+      "size": 95,
+      "loc": 4
+    },
+    {
+      "path": "src/build123d_mcp/executor.py",
+      "kind": "code",
+      "language": "Python",
+      "size": 11923,
+      "loc": 375
+    },
+    {
+      "path": "src/build123d_mcp/exporter.py",
+      "kind": "code",
+      "language": "Python",
+      "size": 4296,
+      "loc": 142
+    },
+    {
+      "path": "src/build123d_mcp/renderer.py",
+      "kind": "code",
+      "language": "Python",
+      "size": 5295,
+      "loc": 176
+    },
+    {
+      "path": "src/build123d_mcp/server.py",
+      "kind": "code",
+      "language": "Python",
+      "size": 16460,
+      "loc": 407
+    },
+    {
+      "path": "tests/__init__.py",
+      "kind": "test",
+      "language": "Python",
+      "size": 0,
+      "loc": 0
+    },
+    {
+      "path": "tests/test_executor.py",
+      "kind": "test",
+      "language": "Python",
+      "size": 2888,
+      "loc": 94
+    },
+    {
+      "path": "tests/test_exporter.py",
+      "kind": "test",
+      "language": "Python",
+      "size": 2197,
+      "loc": 67
+    },
+    {
+      "path": "tests/test_server.py",
+      "kind": "test",
+      "language": "Python",
+      "size": 5002,
+      "loc": 154
+    }
+  ]
+}
