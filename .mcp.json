@@ -1,0 +1,8 @@
+{
+  "mcpServers": {
+    "build123d": {
+      "command": "uvx",
+      "args": ["--from", "${CLAUDE_PLUGIN_ROOT}", "build123d-mcp"]
+    }
+  }
+}

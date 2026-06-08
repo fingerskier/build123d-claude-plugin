@@ -1,0 +1,12 @@
+{
+  "name": "build123d",
+  "version": "2026.6.8",
+  "description": "CAD modeling with build123d — create, inspect, and export parametric 3D models using Python.",
+  "author": {
+    "name": "Fingerskier"
+  },
+  "repository": "https://github.com/fingerskier/build123d-claude-plugin",
+  "license": "MIT",
+  "keywords": ["build123d", "cad", "3d-modeling", "parametric", "stl", "step", "mcp"],
+  "mcpServers": "./.mcp.json"
+}

@@ -9,7 +9,7 @@ Use these tools to create and export CAD models:
 - **`execute_build123d`** — Run build123d Python code to create a 3D model. All build123d names are pre-imported. Store the result in a variable named `result` or use a `BuildPart` context manager.
 - **`export_stl`** — Export a model to STL format (triangulated mesh, for 3D printing).
 - **`export_step`** — Export a model to STEP format (precise BREP, for CAD interchange).
-- **`render_image`** — Render a model to a PNG image (views: iso, front, back, right, left, top, bottom).
+- **`render_image`** — Render a model to a PNG image (views: iso, front, back, right, left, top, bottom, iso_back).
 - **`list_models`** — List all models in the current session.
 - **`get_model_info`** — Get detailed properties (bounding box, volume, surface area, topology).
 - **`delete_model`** — Remove a model from the session.
@@ -65,10 +65,9 @@ result = box - hole
 | `chamfer(edges, length=L)` | Bevel edges |
 | `loft(sections=[s1, s2])` | Loft between sections |
 | `sweep(path=wire)` | Sweep section along path |
-| `offset(amount=N)` | Offset/shell a shape |
+| `offset(amount=N, openings=face)` | Offset a shape; with `openings`, hollow it into a thin-walled shell (build123d has no separate `shell()` operation) |
 | `mirror(about=Plane.XZ)` | Mirror geometry |
 | `split(bisect_by=Plane.XZ)` | Split shape with plane |
-| `shell(faces, thickness)` | Hollow out a solid |
 
 ### Boolean Operations
 - **Builder mode**: Use `mode=Mode.ADD` (default), `mode=Mode.SUBTRACT`, `mode=Mode.INTERSECT`
@@ -133,7 +132,9 @@ When writing build123d code for `execute_build123d`, use this pattern:
 
 ```python
 # All build123d names are pre-imported (Box, Cylinder, BuildPart, etc.)
-# math module is also available
+# `math` is pre-imported too. You may also `import` these stdlib modules:
+# typing, collections, itertools, functools, dataclasses, enum.
+# Other imports (os, sys, subprocess, ...) are blocked.
 
 # Define parameters
 width = 50
