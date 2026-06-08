@@ -18,9 +18,10 @@ with BuildPart() as bottom:
     Box(inner_width + 2 * wall, inner_depth + 2 * wall, inner_height + wall)
     # Round vertical edges
     fillet(bottom.edges().filter_by(Axis.Z), radius=corner_radius)
-    # Hollow out (shell from top face)
+    # Hollow out (shell from the top face) — build123d has no `shell()`
+    # operation; a thin-walled solid with an open face is made with `offset`.
     top_face = bottom.faces().sort_by(Axis.Z)[-1]
-    shell(top_face, amount=-wall)
+    offset(amount=-wall, openings=top_face)
     # Screw mounting holes in corners
     with BuildSketch(bottom.faces().sort_by(Axis.Z)[-1]):
         with Locations([
