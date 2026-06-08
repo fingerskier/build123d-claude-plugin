@@ -23,10 +23,8 @@ ENV/
 # OS
 .DS_Store
 Thumbs.db
+*.stackdump
 
-# CAD output
+# CAD output (default export directory)
+cad-output/
 output/
-*.stl
-*.step
-*.stp
-*.svg

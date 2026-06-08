@@ -1,6 +1,6 @@
 {
   "name": "build123d",
-  "version": "2026.6.2",
+  "version": "2026.6.8",
   "description": "CAD modeling with build123d — create, inspect, and export parametric 3D models using Python.",
   "author": {
     "name": "Fingerskier"

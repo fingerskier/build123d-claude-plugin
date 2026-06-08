@@ -22,13 +22,15 @@ ALLOWED_MODULES = frozenset({
     "enum",
 })
 
-# Builtins blocked from executed code
+# Builtins blocked from executed code.
+# Note: `__import__` is not listed here because it is replaced wholesale by a
+# constrained wrapper (`_safe_import`) that only permits ALLOWED_MODULES — see
+# `_make_safe_builtins`.
 BLOCKED_BUILTINS = frozenset({
     "open",
     "exec",
     "eval",
     "compile",
-    "__import__",
     "exit",
     "quit",
     "breakpoint",
@@ -95,14 +97,51 @@ def _validate_ast(code: str) -> None:
                 )
 
 
+def _safe_import(
+    name: str,
+    globals: Any = None,
+    locals: Any = None,
+    fromlist: tuple[str, ...] = (),
+    level: int = 0,
+) -> Any:
+    """A constrained replacement for ``__import__``.
+
+    Only modules whose root package is in ALLOWED_MODULES may be imported, and
+    relative imports (``level > 0``) are rejected. This is what actually makes
+    the AST-level import allow-list usable at runtime — without it, executed
+    code cannot run any ``import`` statement at all.
+    """
+    import builtins
+
+    root_module = name.split(".")[0] if name else ""
+    if level != 0 or root_module not in ALLOWED_MODULES:
+        raise ImportError(
+            f"Import of '{name or '.' * level}' is not allowed. "
+            f"Allowed modules: {', '.join(sorted(ALLOWED_MODULES))}"
+        )
+    return builtins.__import__(name, globals, locals, fromlist, level)
+
+
 def _make_safe_builtins() -> dict[str, Any]:
-    """Create a restricted builtins dict."""
+    """Create a restricted builtins dict.
+
+    Excludes the names in BLOCKED_BUILTINS and all dunder names, then re-adds
+    the language-level builtins that ordinary code needs:
+
+    * ``__import__`` — a constrained wrapper (``_safe_import``) so that allowed
+      ``import`` statements actually work.
+    * ``__build_class__`` — required for ``class`` definitions (and therefore
+      for ``@dataclass`` / ``Enum`` subclasses).
+    """
     import builtins
 
     safe = {}
     for name in dir(builtins):
         if name not in BLOCKED_BUILTINS and not name.startswith("_"):
             safe[name] = getattr(builtins, name)
+
+    safe["__import__"] = _safe_import
+    safe["__build_class__"] = builtins.__build_class__
     return safe
 
 
@@ -110,7 +149,11 @@ def _make_namespace() -> dict[str, Any]:
     """Create the execution namespace pre-populated with build123d imports."""
     import build123d
 
-    namespace: dict[str, Any] = {"__builtins__": _make_safe_builtins()}
+    namespace: dict[str, Any] = {
+        "__builtins__": _make_safe_builtins(),
+        # `class` definitions read `__name__` from globals to set `__module__`.
+        "__name__": "build123d_sandbox",
+    }
 
     # Import all public build123d names into namespace
     for name in dir(build123d):

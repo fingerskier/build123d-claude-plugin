@@ -14,7 +14,7 @@ from mcp.types import TextContent, ImageContent, Tool
 
 from build123d_mcp.executor import execute_code, ExecutionError, SecurityError
 from build123d_mcp.exporter import export_stl, export_step, get_model_properties, properties_summary
-from build123d_mcp.renderer import render_png_base64, render_svg, save_png, save_svg
+from build123d_mcp.renderer import render_png_base64, save_png, save_svg
 
 logger = logging.getLogger(__name__)
 
@@ -226,8 +226,14 @@ async def _handle_execute(args: dict[str, Any]) -> list[TextContent]:
     if len(code) > MAX_CODE_LENGTH:
         return [TextContent(type="text", text=f"Code too large ({len(code)} chars). Maximum is {MAX_CODE_LENGTH}.")]
 
+    # Run on the event-loop (main) thread rather than via asyncio.to_thread.
+    # execute_code's preferred timeout uses signal.SIGALRM, which only works on
+    # the main thread; off the main thread it falls back to spawning a
+    # subprocess and pickling the resulting shape back, which is slow and
+    # fragile. A CAD build blocks this single-client stdio server only while the
+    # client is already awaiting the result, so blocking here is acceptable.
     try:
-        result = await asyncio.to_thread(execute_code, code)
+        result = execute_code(code)
     except SecurityError as e:
         logger.warning("Security error for model '%s': %s", model_name, e)
         return [TextContent(type="text", text=f"Security error: {e}")]
@@ -350,7 +356,7 @@ async def _handle_list_models(args: dict[str, Any]) -> list[TextContent]:
 async def _handle_get_model_info(args: dict[str, Any]) -> list[TextContent]:
     model_name = args["model_name"]
     if model_name not in _models:
-        return [TextContent(type="text", text=f"Model '{model_name}' not found.")]
+        return [TextContent(type="text", text=f"Model '{model_name}' not found. Use list_models to see available models.")]
 
     shape = _models[model_name]
     props = get_model_properties(shape)
@@ -360,7 +366,7 @@ async def _handle_get_model_info(args: dict[str, Any]) -> list[TextContent]:
 async def _handle_delete_model(args: dict[str, Any]) -> list[TextContent]:
     model_name = args["model_name"]
     if model_name not in _models:
-        return [TextContent(type="text", text=f"Model '{model_name}' not found.")]
+        return [TextContent(type="text", text=f"Model '{model_name}' not found. Use list_models to see available models.")]
 
     del _models[model_name]
     return [TextContent(type="text", text=f"Model '{model_name}' deleted.")]
